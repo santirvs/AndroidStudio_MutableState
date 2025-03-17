@@ -4,7 +4,10 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -15,8 +18,12 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -24,6 +31,10 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Divider
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
@@ -33,7 +44,9 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.ProgressIndicatorDefaults
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.RadioButtonDefaults
+import androidx.compose.material3.RangeSlider
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Slider
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
@@ -41,6 +54,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TriStateCheckbox
+import androidx.compose.material3.VerticalDivider
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
@@ -63,6 +77,8 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -627,14 +643,262 @@ fun MyStateExample_13_1() {
 
 //endregion presentacio_13
 
+//region presentacio_14 DropdownMenu
+@Composable
+fun MyStateExample_14_1() {
+    var selectedText by remember { mutableStateOf("") }
+    var expanded by remember { mutableStateOf(false) }
+    val hobbies = listOf("Play music", "Practice sport", "Programming", "Reading", "Other")
+
+    Column(Modifier.padding(20.dp)) {
+        OutlinedTextField(
+            value = selectedText,
+            onValueChange = { selectedText = it },
+            enabled = false,
+            readOnly = true,
+            modifier = Modifier
+                .clickable { expanded = true }
+                .fillMaxWidth()
+        )
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            hobbies.forEach { hobby ->
+                DropdownMenuItem(text = { Text(text = hobby) }, onClick = {
+                    expanded = false
+                    selectedText = hobby
+                })
+            }
+        }
+    }
+}
+//endregion presentacio_14
+
+//region presentacio_15 BadgeBox i Divider
+@Composable
+fun MyStateExample_15_1() {
+    //Badge simple
+    BadgedBox(
+        modifier = Modifier.padding(20.dp),
+        badge = { Badge { Text("10") } }) {
+        Icon(
+            Icons.Default.Email,
+            contentDescription = "Phone"
+        )
+    }
+
+    HorizontalDivider(modifier = Modifier,
+        thickness = 2.dp,
+        color = Color.Blue
+    )
+
+
+    //Canvi de color del fons i del contingut
+    BadgedBox(
+        modifier = Modifier.padding(20.dp),
+        badge = { Badge(containerColor = Color.Green, contentColor = Color.Red)
+        { Text("10") } }) {
+        Icon(
+            Icons.Default.Email,
+            contentDescription = "Phone"
+        )
+    }
+
+    VerticalDivider(modifier = Modifier,
+        thickness = 10.dp,
+        color = Color.Yellow
+    )
+
+}
+//endregion presentacio_15
+
+//region presentacio_16 Slider
+@Composable
+fun MyStateExample_16_1() {
+    //Slider bàsic
+    var sliderValue0 by remember {
+        mutableStateOf(0f)
+    }
+    Slider(value = sliderValue0, onValueChange = { sliderValue0 = it })
+    Text(text = sliderValue0.toString())
+
+    Spacer(Modifier.padding(10.dp))
+
+    //Slider "tunejat"
+    var sliderValue by remember {
+        mutableStateOf(0f)
+    }
+    Slider(
+        value = sliderValue,
+        onValueChange = { sliderValue = it },
+        valueRange = 0f..10f,
+        steps = 9
+    )
+    Text(text = sliderValue.toString())
+
+    Spacer(Modifier.padding(10.dp))
+
+    //Slider "tunejat" millorat amb onValueChangeFinished
+    var sliderValue2 by remember { mutableStateOf(0f) }
+    var finishValue2 by remember { mutableStateOf("") }
+    Slider(
+        value = sliderValue2,
+        onValueChange = { sliderValue2 = it },
+        onValueChangeFinished = { finishValue2 = sliderValue2.toString()},
+        valueRange = 0f..10f,
+        steps = 9
+    )
+    Text(text = finishValue2)
+
+    Spacer(Modifier.padding(10.dp))
+
+    //RangeSlider
+    var currentRange by remember { mutableStateOf(2f..5f) }
+    RangeSlider(value = currentRange,
+        onValueChange = { currentRange = it },
+        valueRange = 0f..10f)
+    Text(text = "From ${currentRange.start} to ${currentRange.endInclusive}")
+
+}
+//endregion presentacio_16
+
+//region presentacio_17 Dialog
+
+@Composable
+fun MyDialog1(show: Boolean){
+    if(show){
+        Dialog(onDismissRequest = { }) {
+            Column(
+                Modifier.background(Color.White)
+                    .padding(24.dp)
+                    .fillMaxWidth()) {
+                Text(text = "This is my dialog")
+            }
+        }
+    }
+}
+
+@Composable
+fun MyDialog2(show: Boolean, onDismiss: () -> Unit){
+    if(show){
+        Dialog(onDismissRequest = { onDismiss() }) {
+            Column(
+                Modifier.background(Color.White)
+                    .padding(24.dp).fillMaxWidth()) {
+                Text(text = "This is my dialog")
+            }
+        }
+    }
+}
+
+@Composable
+fun MyDialog3(show: Boolean, onDismiss: () -> Unit){
+    if(show) {
+        Dialog(
+            onDismissRequest = { onDismiss() },
+            properties = DialogProperties(dismissOnBackPress = true, dismissOnClickOutside = true)
+        ) {
+            Column(
+                Modifier.background(Color.White).padding(24.dp).fillMaxWidth()
+            )
+            {
+                Text(text = "This is my dialog")
+            }
+        }
+    }
+}
+
+
+@Composable
+fun MyStateExample_17_1() {
+    //Dialog bàsic
+    Dialog(onDismissRequest = { }) {
+        Column(
+            Modifier
+                .background(Color.White)
+                .padding(24.dp)
+                .fillMaxWidth()
+        ) {
+            Text(text = "This is my dialog")
+        }
+    }
+}
+@Composable
+fun MyStateExample_17_2() {
+
+    //Dialog generat a partir de l'acció de l'usuari
+    Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+        var show by remember { mutableStateOf(false) }
+        Button(onClick = { show = true }) {
+            Text(text = "Show dialog")
+        }
+        MyDialog1(show)
+    }
+}
+
+@Composable
+fun MyStateExample_17_3() {
+
+    //Dialog generat a partir de l'acció de l'usuari o es clica fora del diàleg
+    Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+        var show by remember { mutableStateOf(false) }
+        Button(onClick = { show = true }) {
+            Text(text = "Show dialog")
+        }
+        MyDialog2(show, { show = false })
+    }
+
+    Spacer(Modifier.padding(10.dp))
+
+    //Dialog generat a partir de l'acció de l'usuari o es clica fora del diàleg
+    Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+        var show by remember { mutableStateOf(false) }
+        Button(onClick = { show = true }) {
+            Text(text = "Show dialog")
+        }
+        MyDialog3(show, { show = false })
+    }
+}
+
+
+@Composable
+fun MyAlertDialog(show: Boolean, onDismiss: () -> Unit, onConfirm: () -> Unit) {
+    if (show) {
+        AlertDialog(
+            onDismissRequest = {},
+            title = { Text("This is an Alert Dialog") },
+            text = { Text("Enjoy the creation of this Alert Dialog") },
+            confirmButton = {TextButton(onClick = {onConfirm()}) {Text(text = "OK")}},
+            dismissButton = {TextButton(onClick = {onDismiss()}) {Text(text = "Cancel")}}
+        )
+    }
+}
+
+
+@Composable
+fun MyStateExample_17_4() {
+    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        var show by remember { mutableStateOf(false) }
+        Button(onClick = { show = true }) {
+            Text(text = "Show dialog")
+        }
+        MyAlertDialog(show, { show = false }, { show = false })
+    }
+}
+
+
+
+//endregion presentacio_17
 
 
 @Composable
 fun MyConstraintLayout(modifier: Modifier = Modifier) {
-    Column( modifier.fillMaxSize(),
+    Column( Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        MyStateExample_13_1()
+        MyStateExample_17_4()
     }
 }
